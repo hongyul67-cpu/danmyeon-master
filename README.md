@@ -1,4 +1,4 @@
-# 🪚 단면도 마스터
+# 🪚 단면도 규칙 마스터
 
 기계·기초 제도 수업용 **단면도 학습·평가 도구**입니다. 설치·인터넷 없이 브라우저(휴대폰 포함)에서 바로 실행되며, [도면읽기 마스터](https://hongyul67-cpu.github.io/domyeon-master/)·[투상도 마스터](https://hongyul67-cpu.github.io/tusang-master/)와 같은 시리즈입니다.
 
@@ -17,7 +17,7 @@
 
 ## 특징
 - 선택 후 **제출** 방식(실수 클릭 방지), 파티클·클리어 배너 등 연출(fx.js)
-- 교사가 [결과수집 링크](https://hongyul67-cpu.github.io/links/link-builder.html)로 열면 결과를 구글시트로 제출(collector.js) — 시트 탭 `단면도 마스터`
+- 교사가 [결과수집 링크](https://hongyul67-cpu.github.io/links/link-builder.html)로 열면 결과를 구글시트로 제출(collector.js) — 시트 탭 `단면도 규칙 마스터`
 - 활용: 수업 설명자료 · 학습 확인(제출) · 수업 보조도구
 
 ## 시리즈 흐름
