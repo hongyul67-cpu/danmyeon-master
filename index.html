@@ -85,6 +85,42 @@
   .chip.no{border-color:var(--wrong);color:#ffc9c9;}
   .chip.yes{border-color:var(--correct);color:#c9f5d2;}
   #fx-hud{margin-bottom:12px;}
+
+  /* ===== 수업 모드(칠판·프로젝터용) ===== */
+  .lesson{position:fixed;inset:0;z-index:60;background:var(--bg-deep);display:flex;flex-direction:column;padding:2vh 3vw 1vh;}
+  .lesson-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .lesson-step{font-size:clamp(.8rem,1.4vw,1rem);color:var(--text-dim);font-weight:700;}
+  .lesson-tools{display:flex;gap:8px;flex-wrap:wrap;}
+  .lbtn{appearance:none;border:1px solid rgba(234,244,255,.3);background:transparent;color:var(--text);
+        border-radius:10px;padding:8px 14px;font-size:clamp(.8rem,1.3vw,1rem);font-weight:700;cursor:pointer;font-family:inherit;}
+  .lbtn:hover{border-color:var(--accent);}
+  .lbtn.acc{background:var(--accent);color:#1a1306;border-color:var(--accent);}
+  .lesson-bar{height:6px;background:rgba(234,244,255,.12);border-radius:6px;margin:8px 0 0;overflow:hidden;}
+  .lesson-bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .25s;}
+  .lesson-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6vh;overflow:auto;padding:1vh 0;}
+  .lesson-title{font-size:clamp(1.4rem,3.6vw,2.7rem);font-weight:900;color:var(--accent);text-align:center;line-height:1.25;}
+  .lesson-figs{display:flex;gap:3vw;flex-wrap:wrap;justify-content:center;align-items:flex-end;}
+  .lesson-fig{text-align:center;}
+  .lesson-fig svg{width:min(46vh,82vw);max-width:420px;height:auto;background:rgba(234,244,255,.03);border-radius:12px;}
+  .lesson-fig .cap{font-size:clamp(.85rem,1.5vw,1.15rem);color:var(--text-dim);margin-top:6px;font-weight:700;}
+  .lesson-points{list-style:none;padding:0;margin:0;max-width:min(1000px,92vw);}
+  .lesson-points li{font-size:clamp(1rem,2.1vw,1.55rem);line-height:1.65;margin:.5em 0;padding-left:1.4em;position:relative;}
+  .lesson-points li::before{content:"•";position:absolute;left:.3em;color:var(--accent);font-weight:900;}
+  .lesson-points li b{color:var(--accent);}
+  .lesson-ask{background:rgba(255,180,84,.12);border:1px solid var(--accent);border-radius:14px;
+              padding:14px 20px;font-size:clamp(.95rem,1.9vw,1.35rem);font-weight:700;max-width:min(950px,92vw);text-align:center;}
+  .lesson-ask small{display:block;font-size:.72em;color:var(--text-dim);font-weight:700;margin-bottom:4px;}
+  .lesson-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:min(1000px,92vw);}
+  .lesson-chips .chip{font-size:clamp(.85rem,1.6vw,1.2rem);padding:8px 16px;}
+  /* 즉석 퀴즈 */
+  .lq{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:min(900px,92vw);width:100%;}
+  @media (max-width:640px){.lq{grid-template-columns:1fr;}}
+  .lq div{background:var(--panel-light);border:2px solid rgba(234,244,255,.18);border-radius:12px;
+          padding:14px 16px;font-size:clamp(.95rem,1.9vw,1.35rem);font-weight:700;text-align:center;}
+  .lq div.on{background:rgba(95,216,111,.2);border-color:var(--correct);}
+  .lq div.on::after{content:" ✔";color:var(--correct);}
+  .lesson-ex{font-size:clamp(.9rem,1.7vw,1.2rem);color:var(--text-dim);max-width:min(950px,92vw);text-align:center;line-height:1.6;}
+  .lesson-hint{font-size:clamp(.72rem,1.15vw,.9rem);color:var(--text-dim);text-align:center;padding-bottom:4px;}
 </style>
 </head>
 <body>
@@ -117,6 +153,11 @@
     <div class="subtitle">속이 안 보이는 부품을 잘라서 보여주는 단면도! 종류·해칭 규칙·단면하지 않는 부품까지 배우고 풀어요.</div>
     <div class="panel">
       <div class="mode-grid">
+        <div class="mode-card" onclick="openLesson()" style="border-color:var(--accent)">
+          <div class="num">선생님용</div>
+          <div class="title">🖥️ 수업 모드 (칠판·프로젝터)</div>
+          <div class="desc">큰 글씨 슬라이드 13장 · 발문 · 즉석 퀴즈 · ←/→ 키(리모컨)로 넘김</div>
+        </div>
         <div class="mode-card" onclick="openLearn()">
           <div class="num">배우기</div>
           <div class="title">📖 단면도 개념 배우기</div>
@@ -142,6 +183,23 @@
         <button class="btn" onclick="openMode('exam')">🏁 종합 점검 (12문제)</button>
       </div>
     </div>
+  </div>
+
+  <!-- ================= 수업 모드 ================= -->
+  <div id="screen-lesson" class="lesson hidden">
+    <div class="lesson-top">
+      <div class="lesson-step" id="ls-step"></div>
+      <div class="lesson-tools">
+        <button class="lbtn" onclick="lsPrev()">← 이전</button>
+        <button class="lbtn acc" onclick="lsNext()">다음 →</button>
+        <button class="lbtn" id="ls-reveal" onclick="lsReveal()">정답/발문 보기 (Q)</button>
+        <button class="lbtn" onclick="lsFull()">⛶ 전체화면 (F)</button>
+        <button class="lbtn" onclick="closeLesson()">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="lesson-bar"><i id="ls-bar"></i></div>
+    <div class="lesson-body" id="ls-body"></div>
+    <div class="lesson-hint">← → 또는 스페이스로 넘기기 · Q 정답/발문 · F 전체화면 · Esc 닫기 (프레젠터 리모컨 사용 가능)</div>
   </div>
 
   <!-- ================= 배우기 ================= -->
@@ -319,6 +377,147 @@ function renderLearn(){
                      + `<div class="chips">`+YESSEC.map(n=>`<span class="chip yes">✅ ${n}</span>`).join('')+`</div>`;
     return `<div class="learn-card"><h3>${c.h}</h3>${fig}<p>${c.p}</p>${chip}</div>`;
   }).join('');
+}
+
+/* ============ 수업 모드(칠판·프로젝터용 슬라이드) ============ */
+function figCompare(){ // 겉모양(숨은선 복잡) vs 단면도
+  return svgWrap(
+    `<text class="lbl" x="36" y="14" text-anchor="middle">겉모양만</text>
+     <path class="ln ln-outline" d="M10 24 h52 v56 h-52 z"/>
+     <line class="ln ln-hidden" x1="20" y1="24" x2="20" y2="80"/>
+     <line class="ln ln-hidden" x1="30" y1="24" x2="30" y2="80"/>
+     <line class="ln ln-hidden" x1="42" y1="24" x2="42" y2="80"/>
+     <line class="ln ln-hidden" x1="52" y1="24" x2="52" y2="80"/>
+     <line class="ln ln-hidden" x1="10" y1="42" x2="62" y2="42"/>
+     <line class="ln ln-hidden" x1="10" y1="62" x2="62" y2="62"/>
+     <text class="lbl acc" x="104" y="14" text-anchor="middle">단면도</text>
+     <rect x="78" y="24" width="52" height="18" fill="url(#hA)"/>
+     <rect x="78" y="62" width="52" height="18" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M78 24 h52 v18 h-52 z"/>
+     <path class="ln ln-outline" d="M78 62 h52 v18 h-52 z"/>
+     <line class="ln ln-center" x1="72" y1="52" x2="136" y2="52"/>`, '0 0 140 92');
+}
+const LESSON = [
+  { t:'단면도, 왜 그릴까?', figs:[[figCompare(),'']],
+    pts:['속이 빈 부품을 겉에서만 그리면 <b>숨은선(파선)</b>이 잔뜩 겹쳐 알아보기 어려워요.',
+         '물체를 <b>잘라낸 것처럼</b> 그리면 속 모양이 <b>굵은 실선</b>으로 뚜렷해져요.',
+         '이렇게 그린 그림이 바로 <b>단면도</b>예요.'],
+    ask:'왼쪽 그림에서 파선이 몇 개 보이나요? 어느 쪽이 더 알아보기 쉬울까요?' },
+  { t:'① 온단면도 (전단면도)', figs:[[figFull(true),'전체가 단면']],
+    pts:['물체를 기본 중심선에서 <b>완전히 반으로</b> 잘라요.',
+         '<b>전체</b>가 단면이 되므로 속 모양을 가장 확실히 보여줘요.',
+         '가장 기본이 되는 단면도예요.'],
+    ask:'이 부품을 자르지 않고 그리면 어떤 선이 많아질까요?' },
+  { t:'② 한쪽단면도 (반단면도)', figs:[[figHalf(true),'절반 겉모양 + 절반 단면']],
+    pts:['<b>대칭</b>인 물체에서 <b>1/4</b>만 잘라내요.',
+         '한쪽은 <b>겉모양</b>, 한쪽은 <b>단면</b> → 한 그림에서 둘 다 보여요.',
+         '대칭이 아니면 쓸 수 없어요!'],
+    ask:'왜 대칭인 물체에만 쓸 수 있을까요?' },
+  { t:'③ 부분단면도', figs:[[figPartial(true),'파단선으로 일부만']],
+    pts:['필요한 <b>일부분만</b> 잘라내 속을 보여줘요.',
+         '자른 경계는 <b>파단선</b>(불규칙한 가는 선)으로 나타내요.',
+         '나머지는 그대로 <b>겉모양</b>으로 둬요.'],
+    ask:'구멍 하나만 확인하고 싶을 때 온단면도와 부분단면도 중 어느 게 좋을까요?' },
+  { t:'④ 회전도시단면도', figs:[[figRevolved(true),'90° 돌려 겹쳐 그림']],
+    pts:['<b>리브·암(바퀴살)·축</b> 같은 것의 단면 모양을 보여줄 때 써요.',
+         '단면을 <b>90° 회전</b>시켜 그 자리에 <b>겹쳐</b> 그려요.',
+         '가는 실선으로 그리는 것이 특징이에요.'],
+    ask:'자동차 휠의 살(암) 단면은 어떻게 생겼을까요?' },
+  { t:'⑤ 계단단면도', figs:[[figOffset(true),'절단선이 꺾임 (A-A)']],
+    pts:['구멍들이 <b>한 직선에 있지 않을 때</b> 써요.',
+         '절단선을 <b>계단처럼 꺾어</b> 여러 곳을 한 번에 자르는 거예요.',
+         '어디를 어떻게 잘랐는지 <b>절단선</b>으로 꼭 표시해요.'],
+    ask:'구멍이 서로 어긋나 있는데 한 번에 보여주려면 어떻게 자르면 될까요?' },
+  { t:'해칭 — 자른 면에 긋는 빗금', figs:[[figHatchPair('good'),'인접 부품: 방향 반대 ⭕'],[figHatchPair('same'),'같은 방향·간격 ❌']],
+    pts:['자른 면에는 <b>45° 가는 실선</b>을 일정한 간격으로!',
+         '<b>인접한 다른 부품</b>은 방향을 반대로(또는 간격을 다르게).',
+         '<b>같은 부품</b>은 떨어져 있어도 해칭을 <b>똑같이</b>.',
+         '해칭 자리에 <b>글자·치수</b>가 오면 그 부분은 <b>끊어서</b>.'],
+    ask:'오른쪽 그림처럼 그리면 무엇이 헷갈릴까요?' },
+  { t:'절단선과 화살표', figs:[[figCutLine('good'),'굵은 1점 쇄선 + 화살표 + A ⭕'],[figCutLine('thin'),'가는 실선 ❌']],
+    pts:['어디를 잘랐는지 <b>절단선(굵은 1점 쇄선)</b>으로 표시해요.',
+         '양 끝 <b>화살표</b>는 <b>보는 방향</b>을 뜻해요.',
+         '문자를 붙여 <b>A-A 단면도</b>라고 불러요.',
+         '<small style="color:var(--text-dim)">※ 실제 도면에서는 끝부분과 꺾이는 곳만 굵게 그리기도 해요.</small>'],
+    ask:'화살표 방향을 반대로 하면 그림이 어떻게 달라질까요?' },
+  { t:'길이 방향으로 자르지 않는 부품', chips:true,
+    pts:['잘라도 <b>속이 꽉 차</b> 의미가 없거나, 자르면 <b>오해</b>를 주는 부품은 단면하지 않아요.',
+         '시험에 자주 나오니 꼭 외워두세요!'],
+    ask:'축을 길이 방향으로 자르면 어떤 그림이 될까요? 그게 도움이 될까요?' },
+  { q:'다음 중 <b>대칭</b>인 물체에서 겉모양과 속을 한 번에 보여주는 단면도는?',
+    choices:['온단면도','한쪽단면도(반단면도)','부분단면도','회전도시단면도'], answer:1,
+    ex:'대칭 물체는 절반만 잘라 <b>겉모양+단면</b>을 함께 보여주는 한쪽단면도가 편해요.' },
+  { q:'인접한 두 부품의 해칭을 <b>다르게</b> 하는 이유는?',
+    choices:['보기 좋으라고','서로 다른 부품임을 구분하려고','재료를 나타내려고','치수를 표시하려고'], answer:1,
+    ex:'해칭 방향·간격을 다르게 해서 <b>서로 다른 부품</b>임을 알 수 있게 해요.' },
+  { q:'다음 중 <b>길이 방향으로 단면하지 않는</b> 것은?',
+    choices:['본체(하우징)','덮개(커버)','축','관(파이프)'], answer:2,
+    ex:'축·키·볼트·너트·핀·리벳·기어의 이·리브·바퀴살은 길이 방향으로 자르지 않아요.' },
+  { t:'오늘 정리', pts:['단면도 = 잘라서 <b>속을 보여주는</b> 그림',
+         '종류: <b>온단면 · 한쪽단면 · 부분단면 · 회전도시 · 계단단면</b>',
+         '해칭 <b>45°</b>, 인접 부품은 <b>다르게</b>, 같은 부품은 <b>똑같이</b>',
+         '절단선 + <b>화살표(보는 방향)</b> + 문자 → <b>A-A 단면도</b>',
+         '<b>축·키·볼트·핀·리브·기어이</b>는 길이 방향으로 안 자름'],
+    ask:'이제 직접 풀어볼까요? (닫기 → 모드 1~3 또는 종합 점검)' },
+];
+let lsIdx=0, lsShown=false, lsKeyHandler=null;
+function openLesson(){
+  lsIdx=0;
+  document.getElementById('screen-lesson').classList.remove('hidden');
+  if(!lsKeyHandler){
+    lsKeyHandler = (e)=>{
+      if(document.getElementById('screen-lesson').classList.contains('hidden')) return;
+      const k=e.key;
+      if(k==='ArrowRight'||k===' '||k==='PageDown'){ e.preventDefault(); lsNext(); }
+      else if(k==='ArrowLeft'||k==='PageUp'){ e.preventDefault(); lsPrev(); }
+      else if(k==='q'||k==='Q'){ e.preventDefault(); lsReveal(); }
+      else if(k==='f'||k==='F'){ e.preventDefault(); lsFull(); }
+      else if(k==='Escape'){ closeLesson(); }
+    };
+    document.addEventListener('keydown', lsKeyHandler);
+  }
+  lsRender();
+}
+function closeLesson(){
+  document.getElementById('screen-lesson').classList.add('hidden');
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+}
+function lsFull(){
+  if(document.fullscreenElement){ if(document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }
+  else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+}
+function lsNext(){ if(lsIdx<LESSON.length-1){ lsIdx++; lsRender(); } }
+function lsPrev(){ if(lsIdx>0){ lsIdx--; lsRender(); } }
+function lsReveal(){ lsShown=true; lsPaintReveal(); }
+function lsPaintReveal(){
+  const s=LESSON[lsIdx];
+  const ask=document.getElementById('ls-ask'), ex=document.getElementById('ls-ex');
+  if(ask) ask.style.visibility = lsShown ? 'visible' : 'hidden';
+  if(s.q && lsShown){
+    document.querySelectorAll('#ls-body .lq div').forEach((d,i)=>{ if(i===s.answer) d.classList.add('on'); });
+    if(ex) ex.style.visibility='visible';
+  }
+}
+function lsRender(){
+  lsShown=false;
+  const s=LESSON[lsIdx];
+  document.getElementById('ls-step').textContent = `수업 슬라이드 ${lsIdx+1} / ${LESSON.length}`;
+  document.getElementById('ls-bar').style.width = ((lsIdx+1)/LESSON.length*100)+'%';
+  document.getElementById('ls-reveal').textContent = s.q ? '정답 보기 (Q)' : '발문 보기 (Q)';
+  let html='';
+  if(s.q){
+    html += `<div class="lesson-title">${s.q}</div>`;
+    html += `<div class="lq">`+s.choices.map(c=>`<div>${c}</div>`).join('')+`</div>`;
+    html += `<div class="lesson-ex" id="ls-ex" style="visibility:hidden">${s.ex}</div>`;
+  } else {
+    html += `<div class="lesson-title">${s.t}</div>`;
+    if(s.figs) html += `<div class="lesson-figs">`+s.figs.map(([svg,cap])=>`<div class="lesson-fig">${svg}${cap?`<div class="cap">${cap}</div>`:''}</div>`).join('')+`</div>`;
+    if(s.chips) html += `<div class="lesson-chips">`+NOSEC.map(n=>`<span class="chip no">🚫 ${n}</span>`).join('')+`</div>`;
+    if(s.pts) html += `<ul class="lesson-points">`+s.pts.map(p=>`<li>${p}</li>`).join('')+`</ul>`;
+    if(s.ask) html += `<div class="lesson-ask" id="ls-ask" style="visibility:hidden"><small>함께 생각해보기</small>${s.ask}</div>`;
+  }
+  document.getElementById('ls-body').innerHTML = html;
+  document.getElementById('ls-body').scrollTop = 0;
 }
 
 /* ============ 문제 생성 ============ */
