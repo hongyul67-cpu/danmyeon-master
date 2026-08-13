@@ -128,6 +128,19 @@
     font-size:clamp(.95rem,1.7vw,1.15rem);cursor:pointer;}
   .lesson-nav button.main{flex:1.3;background:var(--accent);color:#1a1306;border-color:var(--accent);}
   .lesson-nav button.rev{background:rgba(255,180,84,.16);border-color:var(--accent);color:var(--accent);}
+  /* 표지·소제목·빈칸 */
+  .lesson-cover{text-align:center;}
+  .lesson-note{color:var(--text-dim);font-size:clamp(.9rem,1.6vw,1.2rem);margin-top:10px;}
+  .lesson-sub{font-size:clamp(1rem,2vw,1.45rem);font-weight:800;color:var(--accent);text-align:center;
+    border-left:5px solid var(--accent);padding-left:12px;align-self:flex-start;max-width:min(1000px,92vw);}
+  .lesson-hintbar{background:rgba(95,216,111,.12);border:1px solid var(--correct);color:#c9f5d2;border-radius:12px;
+    padding:10px 16px;font-size:clamp(.85rem,1.5vw,1.1rem);font-weight:700;text-align:center;max-width:min(1000px,92vw);}
+  .blk{display:inline-block;min-width:64px;text-align:center;background:var(--accent);color:#1a1306;
+    border-radius:8px;padding:1px 12px;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(255,180,84,.35);}
+  .blk.on{background:transparent;color:var(--accent);box-shadow:none;cursor:default;min-width:0;padding:0 2px;}
+  /* 그림만 있는 슬라이드는 크게 */
+  .lesson-figs.solo .lesson-fig svg{width:min(52vh,86vw);max-width:560px;}
+  @media (max-width:640px){ .lesson-figs.solo .lesson-fig svg{width:100%;max-width:330px;} }
   .lesson-nav button:disabled{opacity:.35;}
   .lesson-nav button:active{transform:translateY(1px);}
   /* 모바일: 툴바 줄이고 그림·글자 축소해 한 화면에 */
@@ -341,6 +354,72 @@ function figOffset(cap){  // 계단단면도
      <path class="ln ln-outline" d="M90 70 v30 M102 70 v30"/>
      ${cap?`<text class="lbl acc" x="70" y="112" text-anchor="middle">절단선이 꺾임</text>`:''}`, '0 0 140 120');
 }
+/* ── 수업용 추가 그림들 ── */
+function figNoSecShaft(){ // 축은 길이방향으로 자르지 않는다
+  return svgWrap(
+    `<text class="lbl" x="35" y="12" text-anchor="middle">이렇게 ❌</text>
+     <rect x="8" y="26" width="54" height="26" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M8 26 h54 v26 h-54 z"/>
+     <text class="lbl acc" x="35" y="66" text-anchor="middle" font-size="10">축을 잘라 해칭</text>
+     <text class="lbl" x="105" y="12" text-anchor="middle">이렇게 ⭕</text>
+     <rect x="78" y="26" width="54" height="26" fill="none"/>
+     <path class="ln ln-outline" d="M78 26 h54 v26 h-54 z"/>
+     <line class="ln ln-center" x1="72" y1="39" x2="138" y2="39"/>
+     <text class="lbl acc" x="105" y="66" text-anchor="middle" font-size="10">해칭 없음</text>
+     <text class="lbl" x="70" y="86" text-anchor="middle" font-size="10">속이 꽉 차 있어요</text>`, '0 0 140 96');
+}
+function figRibNoHatch(){ // 리브는 세로로 자를 때 해칭하지 않음
+  return svgWrap(
+    `<path class="ln ln-outline" d="M20 70 h100 v-12 h-100 z"/>
+     <rect x="20" y="58" width="100" height="12" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M62 58 L62 20 L78 20 L78 58"/>
+     <text class="lbl acc" x="70" y="16" text-anchor="middle" font-size="10">리브 = 해칭 안 함</text>
+     <text class="lbl" x="70" y="86" text-anchor="middle" font-size="10">밑판은 해칭, 리브는 그대로</text>`, '0 0 140 96');
+}
+function figHatchSamePart(){ // 같은 부품은 떨어져 있어도 같은 해칭
+  return svgWrap(
+    `<rect x="14" y="26" width="34" height="40" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M14 26 h34 v40 h-34 z"/>
+     <rect x="92" y="26" width="34" height="40" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M92 26 h34 v40 h-34 z"/>
+     <text class="lbl acc" x="70" y="50" text-anchor="middle" font-size="10">같은 부품</text>
+     <text class="lbl" x="70" y="86" text-anchor="middle" font-size="10">떨어져도 똑같이</text>`, '0 0 140 96');
+}
+function figHatchBreak(){ // 글자 자리는 해칭을 끊는다
+  return svgWrap(
+    `<rect x="16" y="24" width="108" height="44" fill="url(#hA)"/>
+     <path class="ln ln-outline" d="M16 24 h108 v44 h-108 z"/>
+     <rect x="52" y="36" width="38" height="20" fill="var(--bg-deep)"/>
+     <text class="lbl acc" x="71" y="50" text-anchor="middle" font-size="13" font-weight="800">Ø30</text>
+     <text class="lbl" x="70" y="86" text-anchor="middle" font-size="10">글자 자리는 해칭을 끊어요</text>`, '0 0 140 96');
+}
+function figThinPlate(){ // 얇은 판은 굵은 실선으로
+  return svgWrap(
+    `<rect x="18" y="34" width="104" height="5" fill="var(--line-color)"/>
+     <text class="lbl acc" x="70" y="28" text-anchor="middle" font-size="10">개스킷·박판</text>
+     <text class="lbl" x="70" y="58" text-anchor="middle" font-size="10">너무 얇아 해칭이 안 되면</text>
+     <text class="lbl acc" x="70" y="74" text-anchor="middle" font-size="11" font-weight="800">굵은 실선으로 칠해 표시</text>`, '0 0 140 96');
+}
+function figArrowView(){ // 화살표 = 보는 방향
+  return svgWrap(
+    `<path class="ln ln-outline" d="M40 30 h60 v40 h-60 z"/>
+     <path class="ln ln-cut" d="M70 14 V86"/>
+     <polygon class="arrowm" points="70,20 62,28 78,28"/>
+     <text class="lbl acc" x="70" y="10" text-anchor="middle" font-size="11">A</text>
+     
+     <text class="lbl" x="70" y="94" text-anchor="middle" font-size="10">화살표 쪽에서 본 단면</text>`, '0 0 140 100');
+}
+function figSummary5(){ // 5종 한눈에
+  const mini=(inner,x,label)=>`<g transform="translate(${x},6) scale(0.33)">${inner}</g>
+    <text class="lbl" x="${x+22}" y="52" text-anchor="middle" font-size="8">${label}</text>`;
+  return svgWrap(
+    mini(`<rect x="30" y="30" width="80" height="24" fill="url(#hA)"/><rect x="30" y="66" width="80" height="24" fill="url(#hA)"/><path class="ln ln-outline" d="M30 30 h80 v24 h-80 z M30 66 h80 v24 h-80 z"/>`,4,'온단면')+
+    mini(`<rect x="70" y="30" width="40" height="24" fill="url(#hA)"/><rect x="70" y="66" width="40" height="24" fill="url(#hA)"/><path class="ln ln-outline" d="M30 30 h80 v60 h-80 z"/>`,52,'한쪽단면')+
+    mini(`<path class="ln ln-outline" d="M30 32 h80 v56 h-80 z"/><path d="M36 88 h44 q0 -20 8 -30 h-52 z" fill="url(#hA)"/>`,100,'부분단면')+
+    mini(`<path class="ln ln-outline" d="M22 46 h96 v28 h-96 z"/><ellipse cx="70" cy="60" rx="13" ry="22" fill="url(#hA)"/>`,148,'회전도시')+
+    mini(`<path class="ln ln-outline" d="M24 30 h92 v40 h-92 z"/><path class="ln ln-cut" d="M16 40 H56 V60 H124"/>`,196,'계단단면'),
+    '0 0 240 62');
+}
 const SECTYPES = [
   {k:'full', name:'온단면도(전단면도)', fig:figFull,
    ex:'온단면도(전단면도) — 물체를 기본 중심선에서 완전히 잘라 <b>전체를 단면</b>으로 나타내요. 가장 기본이에요.'},
@@ -454,22 +533,35 @@ const LESSON = [
          '절단선을 <b>계단처럼 꺾어</b> 여러 곳을 한 번에 자르는 거예요.',
          '어디를 어떻게 잘랐는지 <b>절단선</b>으로 꼭 표시해요.'],
     ask:'구멍이 서로 어긋나 있는데 한 번에 보여주려면 어떻게 자르면 될까요?' },
-  { t:'해칭 — 자른 면에 긋는 빗금', figs:[[figHatchPair('good'),'인접 부품: 방향 반대 ⭕'],[figHatchPair('same'),'같은 방향·간격 ❌']],
+  { t:'해칭 ① 45°와 인접 부품', figs:[[figHatchPair('good'),'인접 부품: 방향 반대 ⭕'],[figHatchPair('same'),'같은 방향·간격 ❌']],
     pts:['자른 면에는 <b>45° 가는 실선</b>을 일정한 간격으로!',
-         '<b>인접한 다른 부품</b>은 방향을 반대로(또는 간격을 다르게).',
-         '<b>같은 부품</b>은 떨어져 있어도 해칭을 <b>똑같이</b>.',
-         '해칭 자리에 <b>글자·치수</b>가 오면 그 부분은 <b>끊어서</b>.'],
+         '<b>인접한 다른 부품</b>은 방향을 반대로(또는 간격을 다르게).'],
     ask:'오른쪽 그림처럼 그리면 무엇이 헷갈릴까요?' },
+  { t:'해칭 ② 같은 부품 · 글자 자리', figs:[[figHatchSamePart(),'같은 부품 = 같은 해칭'],[figHatchBreak(),'글자 자리는 끊기']],
+    pts:['<b>같은 부품</b>은 떨어져 보여도 해칭을 <b>똑같이</b> 그려요.',
+         '해칭 자리에 <b>글자·치수</b>가 오면 그 부분만 <b>끊어</b>줘요.'],
+    ask:'두 조각이 같은 부품인지 다른 부품인지 어떻게 알 수 있을까요?' },
+  { t:'해칭 ③ 아주 얇은 판', figs:[[figThinPlate(),'굵은 실선으로 표시']],
+    pts:['개스킷·박판처럼 <b>너무 얇으면</b> 해칭을 그릴 수 없어요.',
+         '이럴 땐 <b>굵은 실선</b>으로 칠해 단면을 나타내요.'],
+    ask:'종이 한 장 두께를 45° 빗금으로 그릴 수 있을까요?' },
   { t:'절단선과 화살표', figs:[[figCutLine('good'),'굵은 1점 쇄선 + 화살표 + A ⭕'],[figCutLine('thin'),'가는 실선 ❌']],
     pts:['어디를 잘랐는지 <b>절단선(굵은 1점 쇄선)</b>으로 표시해요.',
-         '양 끝 <b>화살표</b>는 <b>보는 방향</b>을 뜻해요.',
          '문자를 붙여 <b>A-A 단면도</b>라고 불러요.',
          '<small style="color:var(--text-dim)">※ 실제 도면에서는 끝부분과 꺾이는 곳만 굵게 그리기도 해요.</small>'],
+    ask:'절단선이 없으면 보는 사람이 무엇을 알 수 없을까요?' },
+  { t:'화살표 = 보는 방향', figs:[[figArrowView(),'화살표 쪽에서 본 모습']],
+    pts:['절단선 양 끝 <b>화살표</b>는 <b>어느 쪽에서 보는지</b>를 뜻해요.',
+         '방향이 반대면 <b>좌우가 뒤집힌</b> 단면이 나와요.'],
     ask:'화살표 방향을 반대로 하면 그림이 어떻게 달라질까요?' },
-  { t:'길이 방향으로 자르지 않는 부품', chips:true,
+  { t:'길이 방향으로 자르지 않는 부품', figs:[[figNoSecShaft(),'축을 자르면 ❌']], chips:true,
     pts:['잘라도 <b>속이 꽉 차</b> 의미가 없거나, 자르면 <b>오해</b>를 주는 부품은 단면하지 않아요.',
          '시험에 자주 나오니 꼭 외워두세요!'],
     ask:'축을 길이 방향으로 자르면 어떤 그림이 될까요? 그게 도움이 될까요?' },
+  { t:'리브·바퀴살도 해칭하지 않아요', figs:[[figRibNoHatch(),'리브는 그대로']],
+    pts:['<b>리브</b>(보강대)나 <b>바퀴살</b>은 세로로 잘라도 <b>해칭하지 않아요</b>.',
+         '해칭하면 두꺼운 덩어리처럼 <b>오해</b>를 주기 때문이에요.'],
+    ask:'리브에 해칭을 하면 어떤 오해가 생길까요?' },
   { q:'다음 중 <b>대칭</b>인 물체에서 겉모양과 속을 한 번에 보여주는 단면도는?',
     choices:['온단면도','한쪽단면도(반단면도)','부분단면도','회전도시단면도'], answer:1,
     ex:'대칭 물체는 절반만 잘라 <b>겉모양+단면</b>을 함께 보여주는 한쪽단면도가 편해요.' },
@@ -479,15 +571,56 @@ const LESSON = [
   { q:'다음 중 <b>길이 방향으로 단면하지 않는</b> 것은?',
     choices:['본체(하우징)','덮개(커버)','축','관(파이프)'], answer:2,
     ex:'축·키·볼트·너트·핀·리벳·기어의 이·리브·바퀴살은 길이 방향으로 자르지 않아요.' },
-  { t:'오늘 정리', pts:['단면도 = 잘라서 <b>속을 보여주는</b> 그림',
+  { t:'오늘 정리', figs:[[figSummary5(),'단면도 5종 한눈에']],
+    pts:['단면도 = 잘라서 <b>속을 보여주는</b> 그림',
          '종류: <b>온단면 · 한쪽단면 · 부분단면 · 회전도시 · 계단단면</b>',
          '해칭 <b>45°</b>, 인접 부품은 <b>다르게</b>, 같은 부품은 <b>똑같이</b>',
          '절단선 + <b>화살표(보는 방향)</b> + 문자 → <b>A-A 단면도</b>',
          '<b>축·키·볼트·핀·리브·기어이</b>는 길이 방향으로 안 자름'],
     ask:'이제 직접 풀어볼까요? (닫기 → 모드 1~3 또는 종합 점검)' },
 ];
-let lsIdx=0, lsShown=false, lsKeyHandler=null;
+/* ── 개념을 슬라이드 단위로 자동 분할 (자동화설비 CBT 이론학습 방식) ── */
+const SLIDE_ITEMS=2, SLIDE_CHARS=160, CHIP_PER=8;
+function lsPlain(x){ return String(x).replace(/<[^>]+>/g,''); }
+function lsChunk(items,maxN,maxC){
+  const out=[]; let cur=[], len=0;
+  items.forEach(it=>{
+    const L=lsPlain(it).length;
+    if(cur.length && (cur.length>=maxN || len+L>maxC)){ out.push(cur); cur=[]; len=0; }
+    cur.push(it); len+=L;
+  });
+  if(cur.length) out.push(cur);
+  return out;
+}
+function buildDeck(){
+  const out=[];
+  LESSON.forEach(tp=>{
+    if(tp.q){ out.push({kind:'quiz', q:tp.q, choices:tp.choices, answer:tp.answer, ex:tp.ex}); return; }
+    out.push({kind:'cover', title:tp.t});
+    (tp.figs||[]).forEach(([svg,cap])=> out.push({kind:'fig', title:tp.t, svg, cap}));
+    if(tp.chips) lsChunk(NOSEC, CHIP_PER, 999).forEach((p,i,a)=> out.push({kind:'chips', title:tp.t+(a.length>1?` (${i+1}/${a.length})`:''), items:p}));
+    if(tp.pts) lsChunk(tp.pts, SLIDE_ITEMS, SLIDE_CHARS).forEach((p,i,a)=> out.push({kind:'list', title:tp.t+(a.length>1?` (${i+1}/${a.length})`:''), items:p}));
+    if(tp.ask) out.push({kind:'ask', title:tp.t, text:tp.ask});
+  });
+  return out;
+}
+let DECK=[], lsIdx=0, lsShown=false, lsKeyHandler=null, lsBlank=false, BLANKS=[];
+/* <b>핵심어</b>를 빈칸(?)으로 바꿔 학생에게 묻고, 눌러서 정답 공개 */
+function lsBlankify(html){
+  return String(html).replace(/<b>([\s\S]*?)<\/b>/g,(m,inner)=>{
+    const i=BLANKS.push(inner)-1;
+    return `<span class="blk" id="blk${i}" onclick="lsRevealBlank(${i})">?</span>`;
+  });
+}
+function lsRevealBlank(i){
+  const el=document.getElementById('blk'+i);
+  if(!el || el.classList.contains('on')) return;
+  el.innerHTML=BLANKS[i]; el.classList.add('on');
+}
+function lsRevealAllBlanks(){ BLANKS.forEach((v,i)=>lsRevealBlank(i)); }
+function lsToggleBlank(){ lsBlank=!lsBlank; lsRender(); }
 function openLesson(){
+  DECK=buildDeck();
   lsIdx=0;
   document.getElementById('screen-lesson').classList.remove('hidden');
   if(!lsKeyHandler){
@@ -525,44 +658,69 @@ function lsFull(){
   if(document.fullscreenElement){ if(document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }
   else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
 }
-function lsNext(){ if(lsIdx<LESSON.length-1){ lsIdx++; lsRender(); } }
+function lsNext(){ if(lsIdx<DECK.length-1){ lsIdx++; lsRender(); } }
 function lsPrev(){ if(lsIdx>0){ lsIdx--; lsRender(); } }
-function lsReveal(){ lsShown=true; lsPaintReveal(); }
+function lsReveal(){
+  const s=DECK[lsIdx];
+  if(s.kind==='quiz'){ lsShown=true; lsPaintReveal(); return; }
+  if(!lsBlank){ lsBlank=true; lsRender(); return; }              // 빈칸 켜기
+  const left=BLANKS.some((v,i)=>{ const el=document.getElementById('blk'+i); return el && !el.classList.contains('on'); });
+  if(left){ lsRevealAllBlanks(); return; }                        // 남은 빈칸 모두 열기
+  lsBlank=false; lsRender();                                      // 다 열었으면 빈칸 끄기
+}
 function lsPaintReveal(){
-  const s=LESSON[lsIdx];
+  const s=DECK[lsIdx];
   const ask=document.getElementById('ls-ask'), ex=document.getElementById('ls-ex');
   if(ask) ask.style.visibility = lsShown ? 'visible' : 'hidden';
-  if(s.q && lsShown){
+  if(s.kind==='quiz' && lsShown){
     document.querySelectorAll('#ls-body .lq div').forEach((d,i)=>{ if(i===s.answer) d.classList.add('on'); });
     if(ex) ex.style.visibility='visible';
   }
 }
 function lsRender(){
-  lsShown=false;
-  const s=LESSON[lsIdx];
-  document.getElementById('ls-step').textContent = `슬라이드 ${lsIdx+1} / ${LESSON.length}`;
-  document.getElementById('ls-bar').style.width = ((lsIdx+1)/LESSON.length*100)+'%';
-  const rev=document.getElementById('ls-reveal');
-  rev.textContent = s.q ? '정답 보기' : '발문 보기';
-  rev.disabled = !(s.q || s.ask);
+  lsShown=false; BLANKS=[];
+  const s=DECK[lsIdx];
+  document.getElementById('ls-step').textContent = `슬라이드 ${lsIdx+1} / ${DECK.length}`;
+  document.getElementById('ls-bar').style.width = ((lsIdx+1)/DECK.length*100)+'%';
   document.getElementById('ls-prev').disabled = (lsIdx===0);
   const nx=document.getElementById('ls-next');
-  nx.disabled = (lsIdx===LESSON.length-1);
-  nx.textContent = (lsIdx===LESSON.length-1) ? '끝' : '다음 →';
+  nx.disabled = (lsIdx===DECK.length-1);
+  nx.textContent = (lsIdx===DECK.length-1) ? '끝' : '다음 →';
+
   let html='';
-  if(s.q){
+  const wrap = (inner)=> (lsBlank ? lsBlankify(inner) : inner);
+  if(s.kind==='quiz'){
     html += `<div class="lesson-title">${s.q}</div>`;
     html += `<div class="lq">`+s.choices.map(c=>`<div>${c}</div>`).join('')+`</div>`;
     html += `<div class="lesson-ex" id="ls-ex" style="visibility:hidden">${s.ex}</div>`;
-  } else {
-    html += `<div class="lesson-title">${s.t}</div>`;
-    if(s.figs) html += `<div class="lesson-figs">`+s.figs.map(([svg,cap])=>`<div class="lesson-fig">${svg}${cap?`<div class="cap">${cap}</div>`:''}</div>`).join('')+`</div>`;
-    if(s.chips) html += `<div class="lesson-chips">`+NOSEC.map(n=>`<span class="chip no">🚫 ${n}</span>`).join('')+`</div>`;
-    if(s.pts) html += `<ul class="lesson-points">`+s.pts.map(p=>`<li>${p}</li>`).join('')+`</ul>`;
-    if(s.ask) html += `<div class="lesson-ask" id="ls-ask" style="visibility:hidden"><small>함께 생각해보기</small>${s.ask}</div>`;
+  } else if(s.kind==='cover'){
+    html += `<div class="lesson-cover"><div class="lesson-title">${s.title}</div>
+             <div class="lesson-note">이 내용을 함께 알아봅시다</div></div>`;
+  } else if(s.kind==='fig'){
+    html += `<div class="lesson-sub">${s.title}</div>`;
+    html += `<div class="lesson-figs solo"><div class="lesson-fig">${s.svg}${s.cap?`<div class="cap">${s.cap}</div>`:''}</div></div>`;
+  } else if(s.kind==='chips'){
+    html += `<div class="lesson-sub">${s.title}</div>`;
+    html += `<div class="lesson-chips">`+s.items.map(n=>`<span class="chip no">🚫 ${n}</span>`).join('')+`</div>`;
+  } else if(s.kind==='list'){
+    html += `<div class="lesson-sub">${s.title}</div>`;
+    html += wrap(`<ul class="lesson-points">`+s.items.map(p=>`<li>${p}</li>`).join('')+`</ul>`);
+  } else if(s.kind==='ask'){
+    html += `<div class="lesson-sub">${s.title}</div>`;
+    html += `<div class="lesson-ask" id="ls-ask" style="visibility:visible"><small>함께 생각해보기</small>${s.text}</div>`;
   }
-  document.getElementById('ls-body').innerHTML = html;
-  document.getElementById('ls-body').scrollTop = 0;
+  if(lsBlank && BLANKS.length) html = `<div class="lesson-hintbar">🙋 빈칸을 학생에게 물어보고, <b>빈칸을 눌러</b> 정답을 확인하세요.</div>` + html;
+
+  const body=document.getElementById('ls-body');
+  body.innerHTML = html;
+  body.scrollTop = 0;
+
+  const rev=document.getElementById('ls-reveal');
+  const blankable = (s.kind==='list');
+  if(s.kind==='quiz'){ rev.textContent='정답 보기'; rev.disabled=false; }
+  else if(!blankable){ rev.textContent='🙈 빈칸'; rev.disabled=true; }
+  else if(!lsBlank){ rev.textContent='🙈 빈칸 켜기'; rev.disabled=false; }
+  else { rev.textContent='정답 열기'; rev.disabled=false; }
 }
 
 /* ============ 문제 생성 ============ */
