@@ -391,7 +391,7 @@ function figNoSecShaft(){ // 축은 길이방향으로 자르지 않는다
     `<text class="lbl" x="35" y="12" text-anchor="middle">이렇게 ❌</text>
      <rect x="8" y="26" width="54" height="26" fill="url(#hA)"/>
      <path class="ln ln-outline" d="M8 26 h54 v26 h-54 z"/>
-     <text class="lbl acc" x="35" y="66" text-anchor="middle" font-size="10">축을 잘라 해칭</text>
+     <text class="lbl acc" x="37" y="66" text-anchor="middle" font-size="9">축을 잘라 해칭</text>
      <text class="lbl" x="105" y="12" text-anchor="middle">이렇게 ⭕</text>
      <rect x="78" y="26" width="54" height="26" fill="none"/>
      <path class="ln ln-outline" d="M78 26 h54 v26 h-54 z"/>
@@ -439,6 +439,49 @@ function figArrowView(){ // 화살표 = 보는 방향
      <text class="lbl acc" x="70" y="10" text-anchor="middle" font-size="11">A</text>
      
      <text class="lbl" x="70" y="94" text-anchor="middle" font-size="10">화살표 쪽에서 본 단면</text>`, '0 0 140 100');
+}
+function figCombined(){ // 조합에 의한 단면도 — 절단면 2개 이상
+  return svgWrap(
+    `<circle class="ln ln-outline" cx="60" cy="52" r="34"/>
+     <circle class="ln ln-outline" cx="60" cy="52" r="10"/>
+     <circle class="ln ln-outline" cx="60" cy="24" r="6"/>
+     <circle class="ln ln-outline" cx="84" cy="68" r="6"/>
+     <path class="ln ln-cutting" d="M60 12 L60 52 L92 76" fill="none"/>
+     <path d="M56 14 l4 -7 l4 7 z" fill="var(--accent)"/>
+     <path d="M88 80 l7 -3 l-3 -7 z" fill="var(--accent)"/>
+     <text class="lbl acc" x="60" y="6" text-anchor="middle" font-size="9">A</text>
+     <text class="lbl acc" x="103" y="80" text-anchor="middle" font-size="9">A</text>
+`,
+    '0 0 120 96');
+}
+function figOmitSym(){ // 도형의 생략 — 대칭 · 반복 · 중간
+  return svgWrap(
+    `<text class="lbl acc" x="8" y="12" font-size="9">① 대칭 생략</text>
+     <rect class="ln ln-outline" x="16" y="20" width="44" height="30"/>
+     <line class="ln ln-center" x1="60" y1="14" x2="60" y2="56"/>
+     <g stroke="var(--line-color)" stroke-width="1.6">
+       <line x1="55" y1="19" x2="65" y2="19"/><line x1="55" y1="23" x2="65" y2="23"/>
+       <line x1="55" y1="47" x2="65" y2="47"/><line x1="55" y1="51" x2="65" y2="51"/>
+     </g>
+     <text class="lbl" x="72" y="32" font-size="8">중심선 한쪽만 그리고</text>
+     <text class="lbl" x="72" y="44" font-size="8">양 끝에 대칭 기호(=)</text>
+
+     <text class="lbl acc" x="8" y="80" font-size="9">② 반복 생략</text>
+     <circle class="ln ln-outline" cx="24" cy="100" r="6"/>
+     <circle class="ln ln-outline" cx="42" cy="100" r="6"/>
+     <g class="ln ln-outline" stroke-width="2">
+       <path d="M56 94 l10 12 M66 94 l-10 12"/>
+       <path d="M78 94 l10 12 M88 94 l-10 12"/>
+     </g>
+     <text class="lbl" x="8" y="122" font-size="8">양 끝만 그리고 나머지는 +자로</text>
+
+     <text class="lbl acc" x="8" y="148" font-size="9">③ 중간 부분 생략</text>
+     <rect class="ln ln-outline" x="16" y="158" width="34" height="16"/>
+     <rect class="ln ln-outline" x="76" y="158" width="34" height="16"/>
+     <path class="ln ln-outline" d="M50 158 l7 8 l-7 8 M76 158 l-7 8 l7 8" fill="none"/>
+     <text class="lbl" x="8" y="190" font-size="8">긴 물체는 파단선으로 잘라 줄여 그림</text>
+     <text class="lbl acc" x="8" y="202" font-size="8">(치수는 실제 길이를 적는다)</text>`,
+    '0 0 195 212');
 }
 function figSummary5(){ // 5종 한눈에
   const mini=(inner,x,label)=>`<g transform="translate(${x},6) scale(0.33)">${inner}</g>
@@ -564,9 +607,16 @@ const LESSON = [
          '절단선을 <b>계단처럼 꺾어</b> 여러 곳을 한 번에 자르는 거예요.',
          '어디를 어떻게 잘랐는지 <b>절단선</b>으로 꼭 표시해요.'],
     ask:'구멍이 서로 어긋나 있는데 한 번에 보여주려면 어떻게 자르면 될까요?' },
+  { t:'⑥ 조합에 의한 단면도', figs:[[figCombined(),'절단면 2개를 한 평면으로']],
+    pts:['절단면을 <b>두 개 이상</b> 두고, 그것을 한 평면으로 펴서 그린 단면도예요.',
+         '구멍이 <b>각도로 벌어져</b> 있을 때 한 그림에 함께 보여줄 수 있어요.',
+         '어디를 어느 방향에서 봤는지 <b>절단선·화살표·문자(A-A)</b>를 반드시 붙여요.'],
+    ask:'계단단면도와 무엇이 다를까요? (힌트: 꺾이는 방향)' },
   { t:'해칭 ① 45°와 인접 부품', figs:[[figHatchPair('good'),'인접 부품: 방향 반대 ⭕'],[figHatchPair('same'),'같은 방향·간격 ❌']],
     pts:['자른 면에는 <b>45° 가는 실선</b>을 일정한 간격으로!',
-         '<b>인접한 다른 부품</b>은 방향을 반대로(또는 간격을 다르게).'],
+         '간격은 <b>2~3mm</b>가 적당해요. 단면이 크면 그에 맞춰 넓혀도 됩니다.',
+         '<b>인접한 다른 부품</b>은 방향을 반대로(또는 간격을 다르게).',
+         '빗금 대신 연필로 연하게 칠하는 <b>스머징</b>으로 나타내기도 해요.'],
     ask:'오른쪽 그림처럼 그리면 무엇이 헷갈릴까요?' },
   { t:'해칭 ② 같은 부품 · 글자 자리', figs:[[figHatchSamePart(),'같은 부품 = 같은 해칭'],[figHatchBreak(),'글자 자리는 끊기']],
     pts:['<b>같은 부품</b>은 떨어져 보여도 해칭을 <b>똑같이</b> 그려요.',
@@ -593,6 +643,12 @@ const LESSON = [
     pts:['<b>리브</b>(보강대)나 <b>바퀴살</b>은 세로로 잘라도 <b>해칭하지 않아요</b>.',
          '해칭하면 두꺼운 덩어리처럼 <b>오해</b>를 주기 때문이에요.'],
     ask:'리브에 해칭을 하면 어떤 오해가 생길까요?' },
+  { t:'도형의 생략 — 다 그리지 않아도 돼요', figs:[[figOmitSym(),'생략 3가지']],
+    pts:['<b>대칭</b>이면 중심선 한쪽만 그리고 <b>대칭 기호</b>(중심선 양 끝 짧은 두 줄)를 붙여요.',
+         '상하좌우가 모두 대칭이면 <b>1/4</b>만 그리기도 해요.',
+         '같은 모양이 <b>반복</b>되면 양 끝만 그리고 나머지는 <b>굵은 +자</b>나 중심선 교차점으로 표시해요.',
+         '길이가 아주 긴 물체는 <b>중간을 파단선으로 잘라</b> 줄여 그려요 (치수는 실제 값으로).'],
+    ask:'중간을 잘라 그렸는데 치수는 왜 실제 길이를 적어야 할까요?' },
   { q:'다음 중 <b>대칭</b>인 물체에서 겉모양과 속을 한 번에 보여주는 단면도는?',
     choices:['온단면도','한쪽단면도(반단면도)','부분단면도','회전도시단면도'], answer:1,
     ex:'대칭 물체는 절반만 잘라 <b>겉모양+단면</b>을 함께 보여주는 한쪽단면도가 편해요.' },
