@@ -363,8 +363,8 @@ function figPartial(cap){ // 부분단면도
 function figRevolved(cap){ // 회전도시단면도
   return svgWrap(
     `<path class="ln ln-outline" d="M22 46 h96 v28 h-96 z"/>
-     <ellipse cx="70" cy="60" rx="13" ry="22" fill="url(#hA)"/>
-     <ellipse class="ln ln-thin" cx="70" cy="60" rx="13" ry="22"/>
+     <circle cx="70" cy="60" r="13" fill="url(#hA)"/>
+     <circle class="ln ln-thin" cx="70" cy="60" r="13" fill="none"/>
      <line class="ln ln-center" x1="14" y1="60" x2="126" y2="60"/>
      ${cap?`<text class="lbl acc" x="70" y="106" text-anchor="middle">90° 돌려 겹쳐 그림</text>`:''}`);
 }
