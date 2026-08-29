@@ -74,6 +74,14 @@
   .rvex{font-size:0.9rem;line-height:1.6;opacity:0.9;margin-top:8px;}
   .nextrow{display:flex;justify-content:flex-end;margin-top:16px;gap:10px;flex-wrap:wrap;}
   .hidden{display:none !important;}
+  /* 수업 슬라이드가 열려 있는 동안에는 떠 있는 공용 단추를 숨긴다.
+     이것들이 z-index 가 훨씬 높아 슬라이드의 「← 이전 / 다음 →」 네 귀퉁이를 덮고 있어서,
+     그 자리를 누르면 뒤로가기·기록 초기화·수업모드·소리 토글이 대신 눌렸다. */
+  body.ls-open #bb-btn,
+  body.ls-open .tr-btn,
+  body.ls-open .cm-launch,
+  body.ls-open #fxSnd,
+  body.ls-open #rk-badge{display:none !important;}
 
   /* 제도 선 */
   .ln{fill:none;stroke:var(--line-color);}
@@ -511,12 +519,14 @@ const SECTYPES = [
 
 /* ============ 해칭/절단선 보기 그림 ============ */
 function figHatchPair(mode){
-  // mode: 'good'(방향 반대) | 'same'(같은 방향·간격) | 'gap'(간격만 다름·같은 방향) | 'cross'(교차 해칭)
+  // mode: 'good'(방향 반대) | 'same'(같은 방향·간격) | 'gap'(간격만 다름·같은 방향) | 'cross'(교차 해칭) | 'none'(한쪽은 해칭 안 함)
+  // ※ 'gap'(간격만 다르게)은 규격에서도 맞는 방법이라 오답 보기로 쓰지 않는다
   const left = `<rect x="16" y="24" width="42" height="44" fill="url(#hA)"/><path class="ln ln-outline" d="M16 24 h42 v44 h-42 z"/>`;
   let right;
   if(mode==='good')  right = `<rect x="62" y="24" width="42" height="44" fill="url(#hB)"/>`;
   else if(mode==='same') right = `<rect x="62" y="24" width="42" height="44" fill="url(#hA)"/>`;
   else if(mode==='gap')  right = `<rect x="62" y="24" width="42" height="44" fill="url(#hC)"/>`;
+  else if(mode==='none') right = ``;
   else right = `<rect x="62" y="24" width="42" height="44" fill="url(#hA)"/><rect x="62" y="24" width="42" height="44" fill="url(#hB)"/>`;
   return svgWrap(left + right + `<path class="ln ln-outline" d="M62 24 h42 v44 h-42 z"/>`, '0 0 120 88');
 }
@@ -721,6 +731,7 @@ function openLesson(){
   DECK=buildDeck();
   lsIdx=0;
   document.getElementById('screen-lesson').classList.remove('hidden');
+  document.body.classList.add('ls-open');
   if(!lsKeyHandler){
     lsKeyHandler = (e)=>{
       if(document.getElementById('screen-lesson').classList.contains('hidden')) return;
@@ -750,6 +761,7 @@ function openLesson(){
 }
 function closeLesson(){
   document.getElementById('screen-lesson').classList.add('hidden');
+  document.body.classList.remove('ls-open');
   if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
 }
 function lsFull(){
@@ -828,12 +840,19 @@ function lsRender(){
 
 /* ============ 문제 생성 ============ */
 function buildM1(){
-  const base = shuffle(SECTYPES).concat(shuffle(SECTYPES)).slice(0,8);
-  return base.map(t=>{
+  /* 단면도 종류는 5가지뿐이라 「그림 → 이름」만 쓰면 8문항 중 3문항이 그대로 중복된다.
+     「이름 → 그림」을 짝으로 넣어 10문항 풀을 만들고 그중 8개를 뽑는다. */
+  const toName = SECTYPES.map(t=>{
     const others = shuffle(SECTYPES.filter(x=>x.k!==t.k)).slice(0,3);
     return { prompt:'이 그림은 어떤 단면도일까요?', stage:t.fig(),
       choices: shuffle([t,...others]).map(x=>({t:x.name, ok:x.k===t.k})), ex:t.ex };
   });
+  const toFig = SECTYPES.map(t=>{
+    const others = shuffle(SECTYPES.filter(x=>x.k!==t.k)).slice(0,3);
+    return { prompt:`<b>${t.name}</b>에 해당하는 그림은?`,
+      choices: shuffle([t,...others]).map(x=>({svg:x.fig(), ok:x.k===t.k})), ex:t.ex };
+  });
+  return shuffle(toName.concat(toFig)).slice(0,8);
 }
 function buildM2(){
   const qs=[];
@@ -843,7 +862,7 @@ function buildM2(){
   qs.push({ prompt:'인접한 두 부품을 <b>바르게</b> 해칭한 그림은?',
     choices: shuffle([
       {svg:figHatchPair('good'), ok:true},{svg:figHatchPair('same'), ok:false},
-      {svg:figHatchPair('gap'), ok:false},{svg:figHatchPair('cross'), ok:false}]),
+      {svg:figHatchPair('none'), ok:false},{svg:figHatchPair('cross'), ok:false}]),
     ex:'인접한 <b>다른 부품</b>은 해칭 <b>방향을 반대로</b>(또는 간격을 다르게) 해서 서로 구분해요.' });
   qs.push({ prompt:'절단한 위치를 나타내는 <b>절단선</b>을 바르게 그린 것은?',
     choices: shuffle([
@@ -872,15 +891,17 @@ function buildM2(){
 }
 function buildM3(){
   const qs=[];
+  /* 정답을 매번 따로 뽑으면 같은 부품이 두 번 나온다 — 미리 섞어 두고 하나씩 꺼내 쓴다 */
+  const noPool = shuffle(NOSEC), yesPool = shuffle(YESSEC);
   for(let i=0;i<8;i++){
     if(i%2===0){
-      const ans = shuffle(NOSEC)[0];
+      const ans = noPool[Math.floor(i/2) % noPool.length];
       const wrong = shuffle(YESSEC).slice(0,3);
       qs.push({ prompt:'다음 중 <b>길이 방향으로 단면하지 않는</b> 부품은?',
         choices: shuffle([{t:ans,ok:true},...wrong.map(w=>({t:w,ok:false}))]),
         ex:`<b>${ans}</b>처럼 축·키·핀·볼트·너트·리벳·기어의 이·리브·바퀴살 등은 길이 방향으로 자르지 않아요(의미가 없거나 오해를 줌).` });
     } else {
-      const ans = shuffle(YESSEC)[0];
+      const ans = yesPool[Math.floor(i/2) % yesPool.length];
       const wrong = shuffle(NOSEC).slice(0,3);
       qs.push({ prompt:'다음 중 <b>단면으로 나타내는</b> 부품은?',
         choices: shuffle([{t:ans,ok:true},...wrong.map(w=>({t:w,ok:false}))]),
